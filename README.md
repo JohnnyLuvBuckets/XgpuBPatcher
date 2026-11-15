@@ -117,6 +117,7 @@ Board modifications needed after the GPU swap:
 - **The Cerbios team**, for Cerbios
 - **Prehistoricman**, for the 128/256 MB RAM interposer modules and RAM-tester XBlast
 - **Shawn Shakir**, for the original force16path Cerbios for XGPU-B boards
+- **Claude (Anthropic)**, for co-developing the patch, the Windows app, the Python scripts and the documentation
 
 ## Disclaimer
 
