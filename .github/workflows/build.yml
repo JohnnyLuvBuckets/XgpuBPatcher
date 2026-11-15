@@ -1,0 +1,63 @@
+name: Build XgpuBPatcher
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build XgpuBPatcher.exe with the .NET Framework compiler
+        shell: pwsh
+        run: |
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          & $csc /nologo /target:winexe /out:XgpuBPatcher.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll XgpuBPatcher.cs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          (Get-FileHash XgpuBPatcher.exe -Algorithm SHA256).Hash
+
+      - name: Upload unsigned build
+        id: upload-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: XgpuBPatcher-unsigned
+          path: XgpuBPatcher.exe
+
+      # Runs only after SignPath approves the project and the repository
+      # variables/secret below have been added (Settings > Secrets and variables > Actions).
+      - name: Sign with SignPath
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' && github.event_name != 'pull_request' }}
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: XgpuBPatcher
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Upload signed build
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' && github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: XgpuBPatcher-signed
+          path: signed/XgpuBPatcher.exe
+
+      - name: Attach the .exe to the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $exe = if (Test-Path signed/XgpuBPatcher.exe) { "signed/XgpuBPatcher.exe" } else { "XgpuBPatcher.exe" }
+          gh release upload "${{ github.ref_name }}" $exe --clobber
