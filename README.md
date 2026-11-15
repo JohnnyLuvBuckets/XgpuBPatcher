@@ -106,9 +106,11 @@ The 1214 / 122C / 10B8 values replace the calibration Cerbios would normally rea
 ## Hardware guides
 
 Board modifications needed after the GPU swap:
-- XGPU-B Swap Guide: 1.0 / 1.1 Xbox: *link*
-- XGPU-B Swap Guide: 1.2 / 1.3 Xbox: *link*
-- XGPU-B Swap Guide: 1.4 Xbox: *link*
+- [XGPU-B Swap Guide: 1.0 / 1.1 Xbox](guides/XGPU-B_Swap_Guide_1.0-1.1.pdf)
+- [XGPU-B Swap Guide: 1.2 / 1.3 Xbox](guides/XGPU-B_Swap_Guide_1.2-1.3.pdf)
+- [XGPU-B Swap Guide: 1.4 Xbox](guides/XGPU-B_Swap_Guide_1.4.pdf)
+
+Board photos in the guides are based on the motherboard scans at retro.jnltech.net.
 
 ---
 
