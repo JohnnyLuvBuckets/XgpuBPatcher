@@ -114,6 +114,20 @@ Board photos in the guides are based on the motherboard scans at retro.jnltech.n
 
 ---
 
+## Code signing policy
+
+Windows releases of `XgpuBPatcher.exe` are built automatically by [GitHub Actions](.github/workflows/build.yml) from this repository's source.
+
+**Status:** an application for free code signing through the SignPath Foundation open-source program is pending. Until it's approved, release builds are unsigned. Once approved, releases will carry this notice: *Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).*
+
+**Team roles**
+- Committers and reviewers: [JohnnyLuvBuckets](https://github.com/JohnnyLuvBuckets)
+- Approvers: [JohnnyLuvBuckets](https://github.com/JohnnyLuvBuckets)
+
+**Privacy policy:** this program does not transfer any information to other networked systems. It only reads the Cerbios image you select and writes the patched copy you save.
+
+---
+
 ## Credits
 
 - **The Cerbios team**, for Cerbios
