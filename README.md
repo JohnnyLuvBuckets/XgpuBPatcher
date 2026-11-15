@@ -116,11 +116,11 @@ Board photos in the guides are based on the motherboard scans at retro.jnltech.n
 
 ## Credits
 
-- **redoverlord**, for being the first person to attempt the 1.6 GPU transplant
 - **The Cerbios team**, for Cerbios
 - **Prehistoricman**, for the 128/256 MB RAM interposer modules and RAM-tester XBlast
 - **Shawn Shakir**, for the original force16path Cerbios for XGPU-B boards
 - **Claude (Anthropic)**, for co-developing the patch, the Windows app, the Python scripts and the documentation
+- **redoverlord**, for being the first person to attempt the 1.6 GPU transplant
 
 ## Disclaimer
 
