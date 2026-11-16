@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
 
 namespace XgpuBPatcher
 {
@@ -75,6 +75,15 @@ namespace XgpuBPatcher
             return b;
         }
 
+        // x-code and/or entry: opcode 0x06, AND mask 0, OR value (LE) -> result = value
+        static byte[] AndOr(uint val)
+        {
+            byte[] b = new byte[9];
+            b[0] = 0x06;
+            BitConverter.GetBytes(val).CopyTo(b, 5);
+            return b;
+        }
+
         // 0 = not a recognised Cerbios 3.1.0 image, 1 = standard build, 2 = 256MB build
         public static int DetectBuild(byte[] d)
         {
@@ -95,20 +104,21 @@ namespace XgpuBPatcher
         public static List<Patch> Build(RamConfig ram, int board, int ramIndex)
         {
             List<Patch> p = new List<Patch>();
-            if (board == 0 && ramIndex == 0)
+            if (board != 2 && ramIndex != 2)
             {
-                // 1.0/1.1 (Conexant) with 64 MB: verified "gpurev_fixedcal2" build.
-                // Takes the 1.6 path only when the GPU reports revision D3 (XGPU-B), keeps the
-                // EEPROM-read structure with fixed calibration, and uses 1.0/1.1 pad values.
+                // 1.0/1.1 and 1.2/1.3 (Conexant) with OEM RAM: based on the verified 1.0/1.1
+                // "gpurev_fixedcal2" build. Takes the 1.6 path only when the GPU reports revision D3
+                // (XGPU-B), keeps the EEPROM-read structure with fixed calibration, uses 1.0/1.1 pad
+                // values and leaves the encoder setup alone. 128 MB uses the 1.4 128 MB calibration.
                 p.Add(new Patch(0x158, "081000000009000000", "060800000000000000", "GPU revision check (replaces SMBus board check)"));
                 p.Add(new Patch(0x161, "090000000024000000", "0800000000e5ffffff", "GPU revision check"));
                 p.Add(new Patch(0x16A, "060800000000000000", "1100c00000ff000000", "GPU revision check"));
                 p.Add(new Patch(0x173, "0800000000d3ffffff", "020000000f00000000", "Read GPU revision (PMC_BOOT_0)"));
                 p.Add(new Patch(0x17C, "1100c00000ff000000", "06ff00000000000000", "Mask GPU revision byte"));
                 p.Add(new Patch(0x185, "0900000000c9060000", "08d3000000c9060000", "Take the 1.6 path only for an XGPU-B (rev D3)"));
-                p.Add(new Patch(0x57E, "060000ffff00000000", "06000000000000dddd", "0x10B8 = DDDD0000"));
-                p.Add(new Patch(0x5BD, "024812000f00000000", "060000000064646464", "0x122C = 64646464"));
-                p.Add(new Patch(0x5E1, "024812000f00000000", "060000000088888888", "0x1214 = 88888888"));
+                p.Add(new Patch(0x57E, "060000ffff00000000", AndOr(ram.R10B8), "0x10B8 = " + ram.R10B8.ToString("X8")));
+                p.Add(new Patch(0x5BD, "024812000f00000000", AndOr(ram.R122C), "0x122C = " + ram.R122C.ToString("X8")));
+                p.Add(new Patch(0x5E1, "024812000f00000000", AndOr(ram.R1214), "0x1214 = " + ram.R1214.ToString("X8")));
                 p.Add(new Patch(0x72E, "033012000fffffffff", "033012000ff8f8f8f8", "Pad 0x1230 = F8F8F8F8"));
                 p.Add(new Patch(0x737, "033412000faaaaaaaa", "033412000f87878787", "Pad 0x1234 = 87878787"));
                 p.Add(new Patch(0x740, "033812000faaaaaaaa", "033812000fbbbbbbbb", "Pad 0x1238 = BBBBBBBB"));
@@ -286,10 +296,10 @@ namespace XgpuBPatcher
             sb.AppendLine("Will apply:");
             foreach (Patch p in Patcher.Build(ram, cboBoard.SelectedIndex, cboRam.SelectedIndex)) sb.AppendLine(string.Format("  0x{0:X4}  {1}", p.Offset, p.Why));
             sb.AppendLine().AppendLine(ram.Status);
-            if (cboBoard.SelectedIndex == 0 && cboRam.SelectedIndex == 0)
-                sb.AppendLine().AppendLine("1.0/1.1 with 64 MB uses its own verified build: GPU revision detection, fixed calibration and 1.0/1.1 pad values (no Focus init).");
+            if (cboBoard.SelectedIndex != 2 && cboRam.SelectedIndex != 2)
+                sb.AppendLine().AppendLine("1.0 - 1.3 (Conexant) boards use the 1.0/1.1 build: GPU revision detection, fixed calibration and 1.0/1.1 pad values, with no encoder changes. Verified on 1.0/1.1 with 64 MB; the other Conexant combinations are not yet tested.");
             else if (cboBoard.SelectedIndex != 2)
-                sb.AppendLine().AppendLine("Note: for this board and RAM combination the patch is the same as for 1.4 (the Focus init only runs if a Focus encoder is found). Full testing so far was on v1.4 boards; follow the hardware swap guide for your revision.");
+                sb.AppendLine().AppendLine("Note: for Prehistoricman modules on this board the patch is the same as for 1.4 (the Focus init only runs if a Focus encoder is found). Full testing so far was on v1.4 boards.");
             sb.AppendLine().AppendLine("After flashing, enable 480p and 720p in the video settings: 480i can drop the picture for a few seconds at a time on transplant boards.");
             txtInfo.Text = sb.ToString();
             btnPatch.Enabled = problem == null;

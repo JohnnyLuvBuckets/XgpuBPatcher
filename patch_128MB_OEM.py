@@ -3,7 +3,7 @@
 XGPU-B transplant patch for Cerbios 3.1.0 Hybrid Beta
 Configuration: 128 MB OEM Samsung chips (all 8 positions)
 Needs:         the STANDARD Cerbios build (Cerbios_Hybrid_V3.1.0_Beta.bin)
-Boards:        1.0 - 1.4 (fully tested on v1.4 Focus)
+Boards:        1.4 (Focus encoder). For 1.0 - 1.3 use patch_128MB_OEM_v1.0-1.3.py
 
 Usage:  python patch_128MB_OEM.py Cerbios_Hybrid_V3.1.0_Beta.bin [output.bin]
         (or run it with no arguments / drag the .bin onto it and it will ask)

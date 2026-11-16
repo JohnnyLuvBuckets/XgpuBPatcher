@@ -3,7 +3,7 @@
 XGPU-B transplant patch for Cerbios 3.1.0 Hybrid Beta
 Configuration: 64 MB stock RAM (OEM chips, 4 positions)
 Needs:         the STANDARD Cerbios build (Cerbios_Hybrid_V3.1.0_Beta.bin)
-Boards:        1.2 - 1.4 (fully tested on v1.4 Focus). For 1.0/1.1 use patch_64MB_v1.0-1.1.py
+Boards:        1.4 (Focus encoder). For 1.0 - 1.3 use patch_64MB_v1.0-1.3.py
 
 Usage:  python patch_64MB_stock.py Cerbios_Hybrid_V3.1.0_Beta.bin [output.bin]
         (or run it with no arguments / drag the .bin onto it and it will ask)

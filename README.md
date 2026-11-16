@@ -17,8 +17,8 @@ Stock Cerbios picks its memory and video setup from the board revision. A 1.0–
 | 128 MB Prehistoricman modules (4 positions) | 256MB: `Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin` | Tested: boots to the dashboard and runs stable |
 
 **Board revisions:**
-- **1.0 / 1.1 with 64 MB** uses its own verified build. It takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values, and has no Focus encoder init.
-- **All other combinations** use the same patch as 1.4. The Focus encoder init only runs if a Focus encoder is detected. Full testing so far was on v1.4 (Focus) boards.
+- **1.0 / 1.1 and 1.2 / 1.3 (Conexant encoder) with OEM RAM** use the 1.0/1.1 build. It takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values and leaves the encoder setup alone. 128 MB uses the same calibration values as 1.4 with 128 MB. Verified on 1.0/1.1 with 64 MB; the 1.2/1.3 and 128 MB versions are not yet tested on hardware.
+- **1.4 (Focus encoder)**, and **Prehistoricman modules on any board**, use the force16path + Focus init patch. The Focus encoder init only runs if a Focus encoder is detected.
 
 **Not supported yet:** 256 MB (all 8 Prehistoricman modules) on a transplant board.
 
@@ -39,10 +39,11 @@ Windows may show "Windows protected your PC" because the app isn't code-signed. 
 Requires Python 3, nothing else.
 
 ```
-python patch_64MB_stock.py      Cerbios_Hybrid_V3.1.0_Beta.bin
-python patch_64MB_v1.0-1.1.py   Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1.1 boards with 64 MB)
-python patch_128MB_OEM.py       Cerbios_Hybrid_V3.1.0_Beta.bin
-python patch_128MB_modules.py   Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin
+python patch_64MB_stock.py          Cerbios_Hybrid_V3.1.0_Beta.bin      (1.4, 64 MB)
+python patch_128MB_OEM.py           Cerbios_Hybrid_V3.1.0_Beta.bin      (1.4, 128 MB OEM)
+python patch_64MB_v1.0-1.3.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 - 1.3, 64 MB)
+python patch_128MB_OEM_v1.0-1.3.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 - 1.3, 128 MB OEM)
+python patch_128MB_modules.py       Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin   (any board)
 ```
 
 You can also drag the .bin onto the script, or double-click the script and paste the path. The patched file is saved next to the original.
@@ -65,10 +66,11 @@ If you start from the official stock images, your patched file should match exac
 
 | Configuration | MD5 of patched image |
 |---|---|
-| 64 MB stock (1.2 – 1.4) | `fa8679098dc6bee64d0ec8593e751849` |
-| 64 MB stock (1.0 / 1.1) | `ea4ea429315539a46e93055252996484` |
-| 128 MB OEM (8 chips) | `52dd22d43678a38287bc829849f5cb4a` |
-| 128 MB Prehistoricman modules | `e3cb3481c58eb0ab77e8d4bf8e115cd4` |
+| 1.4, 64 MB stock | `fa8679098dc6bee64d0ec8593e751849` |
+| 1.4, 128 MB OEM (8 chips) | `52dd22d43678a38287bc829849f5cb4a` |
+| 1.0 – 1.3, 64 MB stock | `ea4ea429315539a46e93055252996484` |
+| 1.0 – 1.3, 128 MB OEM (8 chips) | `80ad84d0063dd0164cea474fc2615986` |
+| Any board, 128 MB Prehistoricman modules | `e3cb3481c58eb0ab77e8d4bf8e115cd4` |
 
 ## Safety checks
 
