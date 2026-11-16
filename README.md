@@ -45,6 +45,7 @@ python patch_64MB_v1.0-1.1.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1
 python patch_128MB_OEM_v1.0-1.1.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1.1, 128 MB OEM)
 python patch_64MB_v1.2-1.3.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 64 MB)
 python patch_128MB_OEM_v1.2-1.3.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 128 MB OEM)
+python patch_xblast_v1.0-1.1.py     XBlastOS_0.65_RAMTESTER.bin         (XBlast RAM tester, 1.0 / 1.1)
 python patch_xblast_v1.2-1.3.py     XBlastOS_0.65_RAMTESTER.bin         (XBlast RAM tester, 1.2 / 1.3)
 python patch_xblast_v1.4.py         XBlastOS_0.65_RAMTESTER.bin         (XBlast RAM tester, 1.4)
 ```
@@ -65,7 +66,7 @@ Or run this from a command prompt in that folder:
 
 ## XBlast RAM tester (optional)
 
-To test the RAM on a transplant board (for example after fitting all 8 OEM chips), the app's section 5 (or `patch_xblast_v1.2-1.3.py` / `patch_xblast_v1.4.py`) patches Prehistoricman's **XBlastOS 0.65 RAMTESTER** image for the same board and RAM. It accepts his stock image or any build with the same start-up table.
+To test the RAM on a transplant board (for example after fitting all 8 OEM chips), the app's section 5 (or `patch_xblast_v1.0-1.1.py` / `patch_xblast_v1.2-1.3.py` / `patch_xblast_v1.4.py`) patches Prehistoricman's **XBlastOS 0.65 RAMTESTER** image for the same board and RAM. It accepts his stock image or any build with the same start-up table.
 
 | Board | Status |
 |---|---|
@@ -73,9 +74,10 @@ To test the RAM on a transplant board (for example after fitting all 8 OEM chips
 | 1.2 / 1.3, 64 MB | Same settings, not yet tested |
 | 1.4, 128 MB OEM (8 chips) | Tested: boots |
 | 1.4, 64 MB | Same table, not yet tested |
-| 1.0 / 1.1 | Not available yet |
+| 1.0 / 1.1, 128 MB OEM (8 chips) | Tested on RamTests v2: boots (same patch as 1.2 / 1.3) |
+| 1.0 / 1.1, 64 MB | Same settings, not yet tested |
 
-On 1.2 / 1.3 it sets the RAM chips' mode register to 0x132 (the RAMTESTER's 0x232 is for Prehistoricman's modules, whose interposers swap two address lines), 0x1210 = 0, 0x1214 = 68686868 and 0x122C = AAAAAAAA. On 1.4 it replaces the whole start-up table (0x0080-0x0FEF) with the one from the build that passed on a 1.4 transplant board (forces the 1.6 path, initialises the Focus encoder, sets up the OEM chips) and sets the mode register to 0x132. Use **RamTests v2** for the extended RAM test: for it the patch also turns off v2's own write of 0x1210 = 0x110, which frags a 1.4 board. Expected MD5: RamTests v2 `cb380571b305333487d28b7cf7dc62e0`, stock RAMTESTER `6af2f5f95dfa48a1a7cf2afad44edcf3`. Flash it to a spare bank and press **eject** to start XBlast OS; the RAM tests are under **Tools**.
+On 1.0 / 1.1 and 1.2 / 1.3 it sets the RAM chips' mode register to 0x132 (the RAMTESTER's 0x232 is for Prehistoricman's modules, whose interposers swap two address lines), 0x1210 = 0, 0x1214 = 68686868 and 0x122C = AAAAAAAA. On 1.4 it replaces the whole start-up table (0x0080-0x0FEF) with the one from the build that passed on a 1.4 transplant board (forces the 1.6 path, initialises the Focus encoder, sets up the OEM chips) and sets the mode register to 0x132. Use **RamTests v2** for the extended RAM test: for it the patch also turns off v2's own write of 0x1210 = 0x110, which frags a 1.4 board. Expected MD5: RamTests v2 `cb380571b305333487d28b7cf7dc62e0`, stock RAMTESTER `6af2f5f95dfa48a1a7cf2afad44edcf3`. Flash it to a spare bank and press **eject** to start XBlast OS; the RAM tests are under **Tools**.
 
 ---
 

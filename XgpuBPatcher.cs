@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.7.4.0")]
-[assembly: AssemblyFileVersion("1.7.4.0")]
+[assembly: AssemblyVersion("1.8.0.0")]
+[assembly: AssemblyFileVersion("1.8.0.0")]
 
 namespace XgpuBPatcher
 {
@@ -333,7 +333,7 @@ namespace XgpuBPatcher
                     t.Add(new Patch(0x12EF, "b8101200fdc70010010000", "9090909090909090909090", "RamTests v2: 2BL write of 0x1210 = 0x110 turned off"));
                 return t;
             }
-            if (board != 1) return null;
+            if (board != 0 && board != 1) return null;  // 1.0/1.1 and 1.2/1.3 use the same patch
             List<Patch> p = new List<Patch>();
             p.Add(new Patch(0x57E, "031012000f10000000", "031012000f00000000", "0x1210 = 00000000"));
             p.Add(new Patch(0x5A2, "031412000f48084848", "031412000f68686868", "0x1214 = 68686868"));
@@ -361,6 +361,11 @@ namespace XgpuBPatcher
             {
                 if (ramIndex == 1) return "Tested: 1.4 board, 8 OEM Samsung chips (128 MB): boots from the stock RAMTESTER and from RamTests v2 (use RamTests v2 for the extended RAM test).";
                 return "Same table as the tested 128 MB build; not yet tested with 64 MB.";
+            }
+            if (board == 0)
+            {
+                if (ramIndex == 1) return "Tested: 1.0/1.1 board, 8 OEM Samsung chips (128 MB), RamTests v2: boots. Same patch as 1.2/1.3.";
+                return "Same settings as the tested 128 MB build; not yet tested with 64 MB.";
             }
             if (board != 1) return "No verified XBlast build for this board yet.";
             if (ramIndex == 1) return "Tested: 1.2/1.3 board, 8 OEM Samsung chips (128 MB): boots, and the extended RAM test stays clean.";
