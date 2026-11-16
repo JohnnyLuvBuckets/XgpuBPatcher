@@ -107,6 +107,7 @@ The app and scripts refuse to patch when:
 ## After flashing
 
 - **Enable 480p and 720p** in your dashboard's video settings. On transplant boards, 480i can drop the picture for a few seconds at a time. It's a known open issue that has been reported to the Cerbios team.
+- **HDMI kits with the X-HD Redux firmware:** if you see random coloured pixels (sparkles) over HDMI, run X-HD-Config and set **Clock Phase** to **0**. The firmware picks the clock phase for the board's encoder (Conexant or Focus), but the transplanted XGPU-B needs the 1.6 board's value. The setting is saved on the HDMI board.
 - Always flash with a way to recover, such as a spare modchip bank or a programmer.
 
 ---
