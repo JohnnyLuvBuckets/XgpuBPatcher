@@ -7,7 +7,8 @@ Needs:         the STANDARD Cerbios build (Cerbios_Hybrid_V3.1.0_Beta.bin)
 Takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the
 calibration values and uses 1.0/1.1 pad values. No encoder changes. Based on the verified
 1.0/1.1 64 MB "Cerbios_3.1.0_gpurev_fixedcal2" build, with the 128 MB calibration values
-used on 1.4 boards (1214 = 68686868, 122C = AAAAAAAA). Not yet tested on hardware.
+used on 1.4 boards (1214 = 68686868, 122C = AAAAAAAA). Tested: boots to the dashboard,
+shows 128 MB, clean cold boots.
 
 Usage:  python patch_128MB_OEM_v1.0-1.1.py Cerbios_Hybrid_V3.1.0_Beta.bin [output.bin]
         (or run it with no arguments / drag the .bin onto it and it will ask)

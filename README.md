@@ -16,7 +16,7 @@ Stock Cerbios picks its memory and video setup from the board revision. A 1.0–
 | 128 MB OEM Samsung chips (all 8 positions) | Standard: `Cerbios_Hybrid_V3.1.0_Beta.bin` | Uses donor 1.6 calibration values verified on transplant boards |
 
 **Board revisions:**
-- **1.0 / 1.1 (Conexant) with OEM RAM:** takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values and leaves the encoder setup alone. Verified with 64 MB; 128 MB (the 1.4 128 MB calibration values) is not yet tested.
+- **1.0 / 1.1 (Conexant) with OEM RAM:** takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values and leaves the encoder setup alone. Verified with 64 MB and with 128 MB (the 1.4 128 MB calibration values): boots to the dashboard, shows 128 MB, clean cold boots.
 - **1.2 / 1.3 (Conexant) with OEM RAM:** the same GPU check, plus Cerbios's own Conexant encoder setup after the 1.6 path (without it a 1.2/1.3 frags), the 1.4 64 MB calibration with memory-type byte C3 = 0x42, and stock pad values. The same image for 64 MB and 128 MB (the 128 MB donor values gave no picture on this board). Tested with both: boots to the dashboard and runs stable.
 - **1.4 (Focus encoder):** force16path + Focus init. The Focus encoder init only runs if a Focus encoder is detected.
 

@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.7.3.0")]
-[assembly: AssemblyFileVersion("1.7.3.0")]
+[assembly: AssemblyVersion("1.7.4.0")]
+[assembly: AssemblyFileVersion("1.7.4.0")]
 
 namespace XgpuBPatcher
 {
@@ -501,7 +501,7 @@ namespace XgpuBPatcher
             foreach (Patch p in Patcher.Build(ram, cboBoard.SelectedIndex, cboRam.SelectedIndex)) sb.AppendLine(string.Format("  0x{0:X4}  {1}", p.Offset, p.Why));
             sb.AppendLine().AppendLine(ram.Status);
             if (cboBoard.SelectedIndex == 0)
-                sb.AppendLine().AppendLine("1.0/1.1 build: GPU revision detection, fixed calibration and 1.0/1.1 pad values, with no encoder changes. Verified with 64 MB; 128 MB is not yet tested.");
+                sb.AppendLine().AppendLine("1.0/1.1 build: GPU revision detection, fixed calibration and 1.0/1.1 pad values, with no encoder changes. Verified with 64 MB and 128 MB.");
             else if (cboBoard.SelectedIndex == 1)
                 sb.AppendLine().AppendLine("1.2/1.3 build: GPU revision detection, Cerbios's Conexant encoder setup after the 1.6 path, 1.4 calibration with C3 = 0x42 and stock pads. The same image for 64 MB and 128 MB; tested with both.");
             sb.AppendLine().AppendLine("After flashing, enable 480p and 720p in the video settings: 480i can drop the picture for a few seconds at a time on transplant boards.");
