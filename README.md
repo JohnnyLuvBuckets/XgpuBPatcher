@@ -45,6 +45,7 @@ python patch_64MB_v1.0-1.1.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1
 python patch_128MB_OEM_v1.0-1.1.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1.1, 128 MB OEM)
 python patch_64MB_v1.2-1.3.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 64 MB)
 python patch_128MB_OEM_v1.2-1.3.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 128 MB OEM)
+python patch_xblast_v1.2-1.3.py     XBlastOS_0.65_RAMTESTER.bin         (XBlast RAM tester, 1.2 / 1.3)
 ```
 
 You can also drag the .bin onto the script, or double-click the script and paste the path. The patched file is saved next to the original.
@@ -58,6 +59,20 @@ Or run this from a command prompt in that folder:
 ```
 %WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe /nologo /target:winexe /out:XgpuBPatcher.exe XgpuBPatcher.cs
 ```
+
+---
+
+## XBlast RAM tester (optional)
+
+To test the RAM on a transplant board (for example after fitting all 8 OEM chips), the app's section 5 (or `patch_xblast_v1.2-1.3.py`) patches Prehistoricman's **XBlastOS 0.65 RAMTESTER** image for the same board and RAM. It accepts his stock image or any build with the same start-up table.
+
+| Board | Status |
+|---|---|
+| 1.2 / 1.3, 128 MB OEM (8 chips) | Tested: boots, extended RAM test clean |
+| 1.2 / 1.3, 64 MB | Same settings, not yet tested |
+| 1.0 / 1.1, 1.4 | Not available yet |
+
+It sets the RAM chips' mode register to 0x132 (the RAMTESTER's 0x232 is for Prehistoricman's modules, whose interposers swap two address lines), 0x1210 = 0, 0x1214 = 68686868 and 0x122C = AAAAAAAA. Flash it to a spare bank and press **eject** to start XBlast OS; the RAM tests are under **Tools**.
 
 ---
 

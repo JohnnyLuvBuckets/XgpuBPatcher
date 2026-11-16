@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.5.0.0")]
-[assembly: AssemblyFileVersion("1.5.0.0")]
+[assembly: AssemblyVersion("1.6.0.0")]
+[assembly: AssemblyFileVersion("1.6.0.0")]
 
 namespace XgpuBPatcher
 {
@@ -194,6 +194,42 @@ namespace XgpuBPatcher
         }
     }
 
+    // Prehistoricman's XBlastOS 0.65 RAMTESTER (his stock image or the RamTests v2 build: same startup table).
+    static class XBlastPatcher
+    {
+        // null when no verified XBlast build exists yet for this board and RAM.
+        public static List<Patch> Build(int board, int ramIndex)
+        {
+            if (board != 1) return null;
+            List<Patch> p = new List<Patch>();
+            p.Add(new Patch(0x57E, "031012000f10000000", "031012000f00000000", "0x1210 = 00000000"));
+            p.Add(new Patch(0x5A2, "031412000f48084848", "031412000f68686868", "0x1214 = 68686868"));
+            p.Add(new Patch(0x5AB, "032c12000f88888888", "032c12000faaaaaaaa", "0x122C = AAAAAAAA"));
+            p.Add(new Patch(0x5C6, "031412000f09090909", "031412000f68686868", "0x1214 = 68686868"));
+            p.Add(new Patch(0x5E1, "031412000f09090909", "031412000f68686868", "0x1214 = 68686868"));
+            p.Add(new Patch(0x671, "03c002100f32020000", "03c002100f32010000", "RAM mode register 0x132 (stock chips)"));
+            p.Add(new Patch(0x67A, "03c802100f32020000", "03c802100f32010000", "RAM mode register 0x132 (stock chips)"));
+            p.Add(new Patch(0xD28, "03c002100f32020000", "03c002100f32010000", "RAM mode register 0x132 (stock chips)"));
+            p.Add(new Patch(0xD31, "03c802100f32020000", "03c802100f32010000", "RAM mode register 0x132 (stock chips)"));
+            return p;
+        }
+
+        // True when the file is a stock XBlastOS 0.65 RAMTESTER image (every byte the 1.2/1.3 patch changes is as expected).
+        public static bool IsStockRamTester(byte[] d)
+        {
+            if (d == null || d.Length != Patcher.ImageSize) return false;
+            foreach (Patch p in Build(1, 0)) if (!Patcher.Same(d, p.Offset, p.Old)) return false;
+            return true;
+        }
+
+        public static string Status(int board, int ramIndex)
+        {
+            if (board != 1) return "No verified XBlast build for this board yet.";
+            if (ramIndex == 1) return "Tested: 1.2/1.3 board, 8 OEM Samsung chips (128 MB): boots, and the extended RAM test stays clean.";
+            return "Same settings as the tested 128 MB build; not yet tested with 64 MB.";
+        }
+    }
+
     class MainForm : Form
     {
         TextBox txtFile = new TextBox();
@@ -206,6 +242,11 @@ namespace XgpuBPatcher
         Button btnPatch = new Button();
         byte[] image;
         int detected;
+        TextBox txtXbFile = new TextBox();
+        Button btnXbBrowse = new Button();
+        Label lblXb = new Label();
+        Button btnXbPatch = new Button();
+        byte[] xbImage;
 
         static readonly RamConfig[] Rams = new RamConfig[] {
             new RamConfig("64 MB stock (OEM chips, 4 positions)", false, 0x88888888, 0x64646464, 0xDDDD0000, false,
@@ -216,9 +257,9 @@ namespace XgpuBPatcher
 
         public MainForm()
         {
-            Text = "XGPU-B Transplant Cerbios Patcher";
+            Text = "XGPU-B Transplant Patcher (Cerbios + XBlast)";
             Font = new Font("Segoe UI", 9f);
-            ClientSize = new Size(560, 470);
+            ClientSize = new Size(560, 640);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
@@ -255,7 +296,19 @@ namespace XgpuBPatcher
             txtInfo.ScrollBars = ScrollBars.Vertical; txtInfo.BackColor = SystemColors.Window; Controls.Add(txtInfo);
             y += 160;
 
-            btnPatch.SetBounds(386, y, 160, 32); btnPatch.Text = "Patch and save..."; btnPatch.Click += OnPatch; Controls.Add(btnPatch);
+            btnPatch.SetBounds(386, y, 160, 32); btnPatch.Text = "Patch Cerbios and save..."; btnPatch.Click += OnPatch; Controls.Add(btnPatch);
+            y += 46;
+
+            AddLabel("5. Optional: XBlast RAM tester for the same board and RAM", 14, y); y += 22;
+            Label xbHint = new Label(); xbHint.SetBounds(14, y, 532, 20);
+            xbHint.Text = "Choose Prehistoricman's XBlastOS 0.65 RAMTESTER image (.bin).";
+            Controls.Add(xbHint); y += 22;
+            txtXbFile.SetBounds(14, y, 440, 24); txtXbFile.ReadOnly = true; Controls.Add(txtXbFile);
+            btnXbBrowse.SetBounds(462, y - 1, 84, 26); btnXbBrowse.Text = "Browse..."; btnXbBrowse.Click += OnXbBrowse; Controls.Add(btnXbBrowse);
+            y += 30;
+            lblXb.SetBounds(14, y, 532, 36); Controls.Add(lblXb);
+            y += 40;
+            btnXbPatch.SetBounds(386, y, 160, 32); btnXbPatch.Text = "Patch XBlast and save..."; btnXbPatch.Click += OnXbPatch; Controls.Add(btnXbPatch);
 
             UpdateState();
         }
@@ -316,6 +369,60 @@ namespace XgpuBPatcher
             sb.AppendLine().AppendLine("After flashing, enable 480p and 720p in the video settings: 480i can drop the picture for a few seconds at a time on transplant boards.");
             txtInfo.Text = sb.ToString();
             btnPatch.Enabled = problem == null;
+            UpdateXbState();
+        }
+
+        string XbProblem()
+        {
+            if (XBlastPatcher.Build(cboBoard.SelectedIndex, cboRam.SelectedIndex) == null) return XBlastPatcher.Status(cboBoard.SelectedIndex, cboRam.SelectedIndex);
+            if (xbImage == null) return "Choose an XBlastOS 0.65 RAMTESTER image.";
+            if (!XBlastPatcher.IsStockRamTester(xbImage)) return "Not recognised as a stock XBlastOS 0.65 RAMTESTER image (or it is already patched).";
+            return null;
+        }
+
+        void UpdateXbState()
+        {
+            string problem = XbProblem();
+            lblXb.Text = problem != null ? problem : XBlastPatcher.Status(cboBoard.SelectedIndex, cboRam.SelectedIndex);
+            btnXbPatch.Enabled = problem == null;
+        }
+
+        void OnXbBrowse(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "BIOS image (*.bin)|*.bin|All files (*.*)|*.*";
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                try { xbImage = File.ReadAllBytes(dlg.FileName); txtXbFile.Text = dlg.FileName; }
+                catch (Exception ex)
+                {
+                    xbImage = null;
+                    MessageBox.Show(this, "Could not read the file:\r\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            UpdateXbState();
+        }
+
+        void OnXbPatch(object sender, EventArgs e)
+        {
+            string problem = XbProblem();
+            if (problem != null) { MessageBox.Show(this, problem, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            byte[] d = (byte[])xbImage.Clone();
+            StringBuilder log = new StringBuilder();
+            string err = Patcher.Apply(d, XBlastPatcher.Build(cboBoard.SelectedIndex, cboRam.SelectedIndex), log);
+            if (err != null) { MessageBox.Show(this, err, Text, MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            string[] boardTag = new string[] { "v1.0-1.1", "v1.2-1.3", "v1.4" };
+            string[] ramTag = new string[] { "64MB", "128MB_OEM" };
+            using (SaveFileDialog dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "BIOS image (*.bin)|*.bin";
+                dlg.FileName = "XBlastOS_0.65_RAMTESTER_XGPUB_" + boardTag[cboBoard.SelectedIndex] + "_" + ramTag[cboRam.SelectedIndex] + ".bin";
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                try { File.WriteAllBytes(dlg.FileName, d); }
+                catch (Exception ex) { MessageBox.Show(this, "Could not save:\r\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+                txtInfo.Text = "Saved " + dlg.FileName + "\r\n\r\nApplied:\r\n" + log.ToString() + "\r\nMD5: " + Patcher.Md5(d) +
+                               "\r\n\r\nFlash it to a spare bank. Press eject to start XBlast OS; its RAM tests are under Tools.";
+            }
         }
 
         void OnPatch(object sender, EventArgs e)
