@@ -1,5 +1,5 @@
 // XGPU-B Transplant Cerbios Patcher
-// Patches a stock Cerbios 3.1.0 Hybrid Beta image (standard or 256MB build) so a
+// Patches a stock Cerbios 3.1.0 Hybrid Beta image (standard build) so a
 // transplanted 1.6 GPU (XGPU-B) works on a 1.0-1.4 board.
 //
 // Build on any Windows 10/11 PC (no install needed, uses the built-in .NET Framework compiler):
@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.3.0.0")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.4.0.0")]
+[assembly: AssemblyFileVersion("1.4.0.0")]
 
 namespace XgpuBPatcher
 {
@@ -100,7 +100,7 @@ namespace XgpuBPatcher
             return true;
         }
 
-        // board: 0 = 1.0/1.1, 1 = 1.2/1.3, 2 = 1.4.  ramIndex: 0 = 64 MB stock, 1 = 128 MB OEM, 2 = 128 MB modules
+        // board: 0 = 1.0/1.1, 1 = 1.2/1.3, 2 = 1.4.  ramIndex: 0 = 64 MB stock, 1 = 128 MB OEM
         public static List<Patch> Build(RamConfig ram, int board, int ramIndex)
         {
             List<Patch> p = new List<Patch>();
@@ -210,9 +210,7 @@ namespace XgpuBPatcher
             new RamConfig("64 MB stock (OEM chips, 4 positions)", false, 0x88888888, 0x64646464, 0xDDDD0000, false,
                 "Tested: v1.4 Focus board, 0 FRAGs in 10 cold boots, 0 errors in memory, GPU and hard drive stress tests."),
             new RamConfig("128 MB OEM Samsung chips (all 8 positions)", false, 0x68686868, 0xAAAAAAAA, 0xDDDD0000, false,
-                "Uses the donor 1.6 calibration values verified on the transplant boards (1214 = 68686868, 122C = AAAAAAAA, 10B8 = DDDD0000)."),
-            new RamConfig("128 MB Prehistoricman modules (4 positions)", true, 0x68686868, 0xAAAAAAAA, 0xDDDD0000, true,
-                "Tested: boots to the dashboard and runs stable with the donor calibration values and 0x6C = 0x23.")
+                "Uses the donor 1.6 calibration values verified on the transplant boards (1214 = 68686868, 122C = AAAAAAAA, 10B8 = DDDD0000).")
         };
 
         public MainForm()
@@ -235,7 +233,6 @@ namespace XgpuBPatcher
             AddLabel("2. Cerbios build", 14, y); y += 22;
             cboBuild.SetBounds(14, y, 532, 24); cboBuild.DropDownStyle = ComboBoxStyle.DropDownList;
             cboBuild.Items.Add("Standard (Cerbios_Hybrid_V3.1.0_Beta.bin)");
-            cboBuild.Items.Add("256MB (Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin)");
             cboBuild.SelectedIndex = 0; cboBuild.SelectedIndexChanged += OnChanged; Controls.Add(cboBuild);
             y += 34;
 
@@ -280,7 +277,7 @@ namespace XgpuBPatcher
                     txtFile.Text = dlg.FileName;
                     detected = Patcher.DetectBuild(image);
                     if (detected == 1) { lblDetected.Text = "Detected: standard Cerbios 3.1.0 build."; cboBuild.SelectedIndex = 0; }
-                    else if (detected == 2) { lblDetected.Text = "Detected: 256MB Cerbios 3.1.0 build."; cboBuild.SelectedIndex = 1; }
+                    else if (detected == 2) { lblDetected.Text = "This is the 256MB Cerbios build. Use the standard build (Cerbios_Hybrid_V3.1.0_Beta.bin)."; cboBuild.SelectedIndex = 0; }
                     else lblDetected.Text = "Not recognised as a stock 256 KB Cerbios 3.1.0 Hybrid Beta image.";
                 }
                 catch (Exception ex)
@@ -296,13 +293,9 @@ namespace XgpuBPatcher
 
         string Problem()
         {
-            RamConfig ram = (RamConfig)cboRam.SelectedItem;
-            bool want256 = cboBuild.SelectedIndex == 1;
             if (image == null) return "Choose a stock Cerbios image first.";
             if (detected == 0) return "The selected file is not a stock Cerbios 3.1.0 Hybrid Beta image.";
-            if ((detected == 2) != want256) return "The selected build doesn't match the file you loaded.";
-            if (ram.Needs256Build && !want256) return "This RAM configuration needs the 256MB Cerbios build.";
-            if (!ram.Needs256Build && want256) return "This RAM configuration needs the standard Cerbios build.";
+            if (detected == 2) return "This is the 256MB Cerbios build. This tool needs the standard build (Cerbios_Hybrid_V3.1.0_Beta.bin).";
             return null;
         }
 
@@ -315,12 +308,10 @@ namespace XgpuBPatcher
             sb.AppendLine("Will apply:");
             foreach (Patch p in Patcher.Build(ram, cboBoard.SelectedIndex, cboRam.SelectedIndex)) sb.AppendLine(string.Format("  0x{0:X4}  {1}", p.Offset, p.Why));
             sb.AppendLine().AppendLine(ram.Status);
-            if (cboBoard.SelectedIndex == 0 && cboRam.SelectedIndex != 2)
+            if (cboBoard.SelectedIndex == 0)
                 sb.AppendLine().AppendLine("1.0/1.1 build: GPU revision detection, fixed calibration and 1.0/1.1 pad values, with no encoder changes. Verified with 64 MB; 128 MB is not yet tested.");
-            else if (cboBoard.SelectedIndex == 1 && cboRam.SelectedIndex != 2)
+            else if (cboBoard.SelectedIndex == 1)
                 sb.AppendLine().AppendLine("1.2/1.3 build: GPU revision detection, Cerbios's Conexant encoder setup after the 1.6 path, 1.4 calibration with C3 = 0x42 and stock pads. Verified with 64 MB; 128 MB is not yet tested.");
-            else if (cboBoard.SelectedIndex != 2)
-                sb.AppendLine().AppendLine("Note: for Prehistoricman modules on this board the patch is the same as for 1.4 (the Focus init only runs if a Focus encoder is found). Full testing so far was on v1.4 boards.");
             sb.AppendLine().AppendLine("After flashing, enable 480p and 720p in the video settings: 480i can drop the picture for a few seconds at a time on transplant boards.");
             txtInfo.Text = sb.ToString();
             btnPatch.Enabled = problem == null;
@@ -337,7 +328,7 @@ namespace XgpuBPatcher
             if (err != null) { MessageBox.Show(this, err, Text, MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
 
             string[] boardTag = new string[] { "v1.0-1.1", "v1.2-1.3", "v1.4" };
-            string[] ramTag = new string[] { "64MB", "128MB_OEM", "128MB_modules" };
+            string[] ramTag = new string[] { "64MB", "128MB_OEM" };
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
                 dlg.Filter = "BIOS image (*.bin)|*.bin";

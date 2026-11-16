@@ -14,14 +14,13 @@ Stock Cerbios picks its memory and video setup from the board revision. A 1.0–
 |---|---|---|
 | 64 MB stock (OEM chips, 4 positions) | Standard: `Cerbios_Hybrid_V3.1.0_Beta.bin` | Tested on a v1.4 Focus board: 0 FRAGs in 10 cold boots, 0 errors in memory, GPU and hard-drive stress tests |
 | 128 MB OEM Samsung chips (all 8 positions) | Standard: `Cerbios_Hybrid_V3.1.0_Beta.bin` | Uses donor 1.6 calibration values verified on transplant boards |
-| 128 MB Prehistoricman modules (4 positions) | 256MB: `Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin` | Tested: boots to the dashboard and runs stable |
 
 **Board revisions:**
 - **1.0 / 1.1 (Conexant) with OEM RAM:** takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values and leaves the encoder setup alone. Verified with 64 MB; 128 MB (the 1.4 128 MB calibration values) is not yet tested.
 - **1.2 / 1.3 (Conexant) with OEM RAM:** the same GPU check, plus Cerbios's own Conexant encoder setup after the 1.6 path (without it a 1.2/1.3 frags), the 1.4 calibration with memory-type byte C3 = 0x42, and stock pad values. Tested with 64 MB: boots to the dashboard and runs stable. 128 MB is not yet tested.
-- **1.4 (Focus encoder)**, and **Prehistoricman modules on any board:** force16path + Focus init. The Focus encoder init only runs if a Focus encoder is detected.
+- **1.4 (Focus encoder):** force16path + Focus init. The Focus encoder init only runs if a Focus encoder is detected.
 
-**Not supported yet:** 256 MB (all 8 Prehistoricman modules) on a transplant board.
+**Not supported:** Prehistoricman RAM modules (128 MB or 256 MB) and the 256MB Cerbios build. Only stock OEM RAM, in 4 or all 8 positions.
 
 ---
 
@@ -29,7 +28,7 @@ Stock Cerbios picks its memory and video setup from the board revision. A 1.0–
 
 ### Option A: Windows app
 1. Download `XgpuBPatcher.exe` from the [Releases](../../releases) page, or build it yourself (see below).
-2. Click **Browse...** and pick your stock Cerbios image. The app detects whether it's the standard or 256MB build.
+2. Click **Browse...** and pick your stock Cerbios image. It must be the standard build; the app tells you if it isn't.
 3. Choose your board revision and RAM configuration.
 4. Click **Patch and save...**. Your original file is never modified.
 5. Compare the MD5 shown with the table below.
@@ -46,7 +45,6 @@ python patch_64MB_v1.0-1.1.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1
 python patch_128MB_OEM_v1.0-1.1.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.0 / 1.1, 128 MB OEM)
 python patch_64MB_v1.2-1.3.py       Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 64 MB)
 python patch_128MB_OEM_v1.2-1.3.py  Cerbios_Hybrid_V3.1.0_Beta.bin      (1.2 / 1.3, 128 MB OEM)
-python patch_128MB_modules.py       Cerbios_Hybrid_V3.1.0_Beta_FOR_256MB_CONSOLES_ONLY.bin   (any board)
 ```
 
 You can also drag the .bin onto the script, or double-click the script and paste the path. The patched file is saved next to the original.
@@ -75,7 +73,6 @@ If you start from the official stock images, your patched file should match exac
 | 1.0 / 1.1, 128 MB OEM (8 chips) | `80ad84d0063dd0164cea474fc2615986` |
 | 1.2 / 1.3, 64 MB stock | `d4adb5c23cf16d9e69810ef566cf631f` |
 | 1.2 / 1.3, 128 MB OEM (8 chips) | `b5330953fd20353fb874afbcbc8417f0` |
-| Any board, 128 MB Prehistoricman modules | `e3cb3481c58eb0ab77e8d4bf8e115cd4` |
 
 ## Safety checks
 
@@ -108,7 +105,6 @@ All patches are in Cerbios's startup (x-code) table. Both builds have the same t
 | 0x587 | GPU reg 0x10B8 fixed (DDDD0000) |
 | 0x5C6 | GPU reg 0x122C fixed (64646464 for 64 MB, AAAAAAAA for 128 MB) |
 | 0x5EA | GPU reg 0x1214 fixed (88888888 for 64 MB, 68686868 for 128 MB) |
-| 0xDD3 / 0xDDC | *128 MB modules only:* PCI 0:0.3 reg 0x6C = 0x00230801 / 0x01230801 |
 
 The 1214 / 122C / 10B8 values replace the calibration Cerbios would normally read from EEPROM bytes C0–C2. That calibration is tuned for the original board's GPU, not the transplanted one.
 
