@@ -158,7 +158,7 @@ Windows releases of `XgpuBPatcher.exe` are built automatically by [GitHub Action
 - **The Cerbios team**, for Cerbios
 - **Prehistoricman**, for the 128/256 MB RAM interposer modules and RAM-tester XBlast
 - **Shawn Shakir**, for the original force16path Cerbios for XGPU-B boards
-- **Claude (Anthropic)**, for co-developing the patch, the Windows app, the Python scripts and the documentation
+- **Claude (Anthropic)**, for writing the patch code, the Windows app and the Python scripts, and co-writing the documentation
 - **redoverlord**, for first attempting the XGPU-B transplant and showing it was worth pursuing
 
 ## Disclaimer
