@@ -6,8 +6,10 @@ Needs:         XBlastOS 0.65 RAMTESTER (Prehistoricman's stock image, or a build
                start-up table such as RamTests v2)
 
 Replaces the whole start-up table (0x0080-0x0FEF) with the one from the XBlast build that passed
-on a 1.4 transplant board: force the 1.6 path, Focus encoder init, OEM chip RAM setup.
-Tested with 8 OEM Samsung chips (128 MB): booted 5 of 5 times. Not yet tested with 64 MB.
+on a 1.4 transplant board (force the 1.6 path, Focus encoder init, OEM chip RAM setup),
+with the RAM chips' mode register set to 0x132. Use RamTests v2 for the extended RAM test: for it,
+v2's own 2BL write of 0x1210 = 0x110 (which frags a 1.4 board) is also turned off.
+Tested with 8 OEM Samsung chips (128 MB) on the stock RAMTESTER and on RamTests v2: boots. Not yet tested with 64 MB.
 
 Usage:  python patch_xblast_v1.4.py XBlastOS_0.65_RAMTESTER.bin [output.bin]
         (or run it with no arguments / drag the .bin onto it and it will ask)
@@ -78,7 +80,7 @@ AA+Li4uLA0ASAA//////A0QSAA+Li4uLA0gSAA+Li4uLA9QCEA8BAAAAA8QCEA9CABAAA8wCEA9C
 ABAAA8ACEA8RAAAAA8gCEA8RAAAAA8ACEA8yAAAAA8gCEA8yAAAAA9ACEA8BAAAAA9ACEA8BAAAA
 AxACEA8AAACAA0wSAA+LqouqA1ASAA+LqgAAAygCEA//BRIIAxgSAA8AAAEABWAIAIAAAAAABv//
 //8ABAAABwQAAABgCACABEwIAIDe/QAABJwIAIAHxxyHBbQIAIAAAAAABv/w//8ADwAABwQAAAC0
-CACABEADAIDAwPDwBEQDAIAAAMAABFwDAIAAAAcEA8ACEA8yAgAAA8gCEA8yAgAABGwDAIABCCMA
+CACABEADAIDAwPDwBEQDAIAAAMAABFwDAIAAAAcEA8ACEA8yAQAAA8gCEA8yAQAABGwDAIABCCMA
 BGwDAIABCCMBCQAAAAAAAAAACQAAAAAAAAAAAwQCEA8QkEQRA0gQAAC+uv7KAhASAA8AAAAABv//
 //8AAQAABwMAAAAQEgAPAkgAAAAAAAAACL66/sotAAAAAwQCEA8AgEQRAhASAA8AAAAABv/+//8A
 AAAABwMAAAAQEgAPCQAAAAAFAQAABIQAAID///8PAwACEA8DAQcDAzQSAAjvvq3eAjQSAAgAAAAA
@@ -105,8 +107,12 @@ def main():
     if table == NEW_TABLE: fail("this image is already patched for 1.4 - start from the original image")
     if hashlib.md5(table).hexdigest() != STOCK_TABLE_MD5:
         fail("start-up table does not match - not a stock XBlastOS 0.65 RAMTESTER image")
+    v2 = bytes(d[0x12E4:0x12FA]) == bytes.fromhex("b8040210fdc70010904411b8101200fdc70010010000")
     d[START:END] = NEW_TABLE
-    print("  0x0080-0x0FEF  start-up table replaced (1.4 transplant: force 1.6 path, Focus init, OEM chip RAM setup)")
+    print("  0x0080-0x0FEF  start-up table replaced (1.4 transplant, mode register 0x132)")
+    if v2:  # RamTests v2's 2BL rewrites 0x1210 after the table runs; that frags a 1.4 board
+        d[0x12EF:0x12FA] = b"\x90" * 11
+        print("  0x12EF         RamTests v2: 2BL write of 0x1210 = 0x110 turned off")
     dst = sys.argv[2] if len(sys.argv) > 2 else os.path.join(
         os.path.dirname(os.path.abspath(src)), "XBlastOS_0.65_RAMTESTER_XGPUB_v1.4.bin")
     open(dst, "wb").write(d)

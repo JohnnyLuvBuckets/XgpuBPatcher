@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.7.0.0")]
-[assembly: AssemblyFileVersion("1.7.0.0")]
+[assembly: AssemblyVersion("1.7.3.0")]
+[assembly: AssemblyFileVersion("1.7.3.0")]
 
 namespace XgpuBPatcher
 {
@@ -302,7 +302,7 @@ namespace XgpuBPatcher
             "A0QSAA+Li4uLA0gSAA+Li4uLA9QCEA8BAAAAA8QCEA9CABAAA8wCEA9CABAAA8ACEA8RAAAAA8gCEA8RAAAAA8ACEA8yAAAAA8gC" +
             "EA8yAAAAA9ACEA8BAAAAA9ACEA8BAAAAAxACEA8AAACAA0wSAA+LqouqA1ASAA+LqgAAAygCEA//BRIIAxgSAA8AAAEABWAIAIAA" +
             "AAAABv////8ABAAABwQAAABgCACABEwIAIDe/QAABJwIAIAHxxyHBbQIAIAAAAAABv/w//8ADwAABwQAAAC0CACABEADAIDAwPDw" +
-            "BEQDAIAAAMAABFwDAIAAAAcEA8ACEA8yAgAAA8gCEA8yAgAABGwDAIABCCMABGwDAIABCCMBCQAAAAAAAAAACQAAAAAAAAAAAwQC" +
+            "BEQDAIAAAMAABFwDAIAAAAcEA8ACEA8yAQAAA8gCEA8yAQAABGwDAIABCCMABGwDAIABCCMBCQAAAAAAAAAACQAAAAAAAAAAAwQC" +
             "EA8QkEQRA0gQAAC+uv7KAhASAA8AAAAABv////8AAQAABwMAAAAQEgAPAkgAAAAAAAAACL66/sotAAAAAwQCEA8AgEQRAhASAA8A" +
             "AAAABv/+//8AAAAABwMAAAAQEgAPCQAAAAAFAQAABIQAAID///8PAwACEA8DAQcDAzQSAAjvvq3eAjQSAAgAAAAACO++rd4JAAAA" +
             "CQAAAAASAAAABIQAAID///8HAwACEA8DAAcDBDwQAIAAAAAABDwYAIAAAAAAEQDAAAAQAAAAEQTAAAAgAAAAEQjAAAATAAAAEQbA" +
@@ -313,13 +313,24 @@ namespace XgpuBPatcher
 
         // 1.4: the whole start-up table (0x80-0xFF0) is replaced with the one from the XBlast build that
         // passed on a 1.4 transplant board with 8 OEM Samsung chips (force 1.6 path, Focus init, OEM calibration).
-        public static List<Patch> Build(int board, int ramIndex)
+        // RamTests v2 (the build with the extended RAM test) has extra RAM setup in its 2BL at 0x12E4.
+        // On a 1.4 board its write of 0x1210 = 0x110 (after the table runs) frags, so it is turned off.
+        public static bool IsRamTestsV2(byte[] d)
+        {
+            return d != null && d.Length == Patcher.ImageSize && Patcher.Same(d, 0x12E4, Patch.Hex("b8040210fdc70010904411b8101200fdc70010010000"));
+        }
+
+        public static List<Patch> Build(int board, int ramIndex) { return Build(board, ramIndex, null); }
+
+        public static List<Patch> Build(int board, int ramIndex, byte[] image)
         {
             if (board == 2)
             {
                 List<Patch> t = new List<Patch>();
                 t.Add(new Patch(0x80, Convert.FromBase64String(StockTable64), Convert.FromBase64String(Board14Table64),
-                    "Start-up table 0x0080-0x0FEF replaced (1.4 transplant: force 1.6 path, Focus init, OEM chip RAM setup)"));
+                    "Start-up table 0x0080-0x0FEF replaced (1.4 transplant: force 1.6 path, Focus init, OEM chip RAM setup, mode register 0x132)"));
+                if (IsRamTestsV2(image))
+                    t.Add(new Patch(0x12EF, "b8101200fdc70010010000", "9090909090909090909090", "RamTests v2: 2BL write of 0x1210 = 0x110 turned off"));
                 return t;
             }
             if (board != 1) return null;
@@ -348,7 +359,7 @@ namespace XgpuBPatcher
         {
             if (board == 2)
             {
-                if (ramIndex == 1) return "Tested: 1.4 board, 8 OEM Samsung chips (128 MB): booted 5 of 5 times.";
+                if (ramIndex == 1) return "Tested: 1.4 board, 8 OEM Samsung chips (128 MB): boots from the stock RAMTESTER and from RamTests v2 (use RamTests v2 for the extended RAM test).";
                 return "Same table as the tested 128 MB build; not yet tested with 64 MB.";
             }
             if (board != 1) return "No verified XBlast build for this board yet.";
@@ -536,7 +547,7 @@ namespace XgpuBPatcher
             if (problem != null) { MessageBox.Show(this, problem, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             byte[] d = (byte[])xbImage.Clone();
             StringBuilder log = new StringBuilder();
-            string err = Patcher.Apply(d, XBlastPatcher.Build(cboBoard.SelectedIndex, cboRam.SelectedIndex), log);
+            string err = Patcher.Apply(d, XBlastPatcher.Build(cboBoard.SelectedIndex, cboRam.SelectedIndex, xbImage), log);
             if (err != null) { MessageBox.Show(this, err, Text, MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
             string[] boardTag = new string[] { "v1.0-1.1", "v1.2-1.3", "v1.4" };
             string[] ramTag = new string[] { "64MB", "128MB_OEM" };
