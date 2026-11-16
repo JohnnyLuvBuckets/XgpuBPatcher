@@ -17,7 +17,7 @@ Stock Cerbios picks its memory and video setup from the board revision. A 1.0–
 
 **Board revisions:**
 - **1.0 / 1.1 (Conexant) with OEM RAM:** takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), forces the calibration values, uses 1.0/1.1 pad values and leaves the encoder setup alone. Verified with 64 MB; 128 MB (the 1.4 128 MB calibration values) is not yet tested.
-- **1.2 / 1.3 (Conexant) with OEM RAM:** the same GPU check, plus Cerbios's own Conexant encoder setup after the 1.6 path (without it a 1.2/1.3 frags), the 1.4 calibration with memory-type byte C3 = 0x42, and stock pad values. Tested with 64 MB: boots to the dashboard and runs stable. 128 MB is not yet tested.
+- **1.2 / 1.3 (Conexant) with OEM RAM:** the same GPU check, plus Cerbios's own Conexant encoder setup after the 1.6 path (without it a 1.2/1.3 frags), the 1.4 64 MB calibration with memory-type byte C3 = 0x42, and stock pad values. The same image for 64 MB and 128 MB (the 128 MB donor values gave no picture on this board). Tested with both: boots to the dashboard and runs stable.
 - **1.4 (Focus encoder):** force16path + Focus init. The Focus encoder init only runs if a Focus encoder is detected.
 
 **Not supported:** Prehistoricman RAM modules (128 MB or 256 MB) and the 256MB Cerbios build. Only stock OEM RAM, in 4 or all 8 positions.
@@ -72,7 +72,7 @@ If you start from the official stock images, your patched file should match exac
 | 1.0 / 1.1, 64 MB stock | `ea4ea429315539a46e93055252996484` |
 | 1.0 / 1.1, 128 MB OEM (8 chips) | `80ad84d0063dd0164cea474fc2615986` |
 | 1.2 / 1.3, 64 MB stock | `d4adb5c23cf16d9e69810ef566cf631f` |
-| 1.2 / 1.3, 128 MB OEM (8 chips) | `b5330953fd20353fb874afbcbc8417f0` |
+| 1.2 / 1.3, 128 MB OEM (8 chips) | `d4adb5c23cf16d9e69810ef566cf631f` (same as 64 MB) |
 
 ## Safety checks
 

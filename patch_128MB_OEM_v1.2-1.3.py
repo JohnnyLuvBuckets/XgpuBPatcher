@@ -7,7 +7,8 @@ Needs:         the STANDARD Cerbios build (Cerbios_Hybrid_V3.1.0_Beta.bin)
 Takes the 1.6 boot path only when the GPU reports revision D3 (XGPU-B), runs Cerbios's own
 Conexant encoder setup after the 1.6 path (this board frags without it), forces the calibration
 values and the memory-type byte (C3 = 0x42) as on 1.4, and keeps the stock pad values.
-Same build with the 1.4 128 MB calibration values. Not yet tested on hardware.
+Same image as the 64 MB build: the 128 MB donor values (68686868 / AAAAAAAA) gave no
+picture on a 1.2/1.3 board. Tested with 128 MB OEM Samsung: the most stable option.
 
 Usage:  python patch_128MB_OEM_v1.2-1.3.py Cerbios_Hybrid_V3.1.0_Beta.bin [output.bin]
         (or run it with no arguments / drag the .bin onto it and it will ask)
@@ -28,8 +29,8 @@ PATCHES = [
     (0x185, "0900000000c9060000", "08d3000000c9060000", "Take the 1.6 path only for an XGPU-B (rev D3)"),
     (0x3BC, "07030000004812000f", "034812000f42000000", "Memory-type byte (EEPROM C3) = 0x42"),
     (0x57E, "060000ffff00000000", "06000000000000dddd", "0x10B8 = DDDD0000"),
-    (0x5BD, "024812000f00000000", "0600000000aaaaaaaa", "0x122C = AAAAAAAA"),
-    (0x5E1, "024812000f00000000", "060000000068686868", "0x1214 = 68686868"),
+    (0x5BD, "024812000f00000000", "060000000064646464", "0x122C = 64646464"),
+    (0x5E1, "024812000f00000000", "060000000088888888", "0x1214 = 88888888"),
     (0x84E, "09000000006a050000", "0900000000b0010000", "End of 1.6 path runs the Conexant encoder setup"),
     (0xB8A, "1104c0000020000000", "09000000002e020000", "After Conexant setup: continue to common code"),
 ]
