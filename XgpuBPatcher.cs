@@ -20,8 +20,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("XgpuBPatcher")]
 [assembly: AssemblyDescription("Patches stock Cerbios 3.1.0 for Xbox boards with a transplanted XGPU-B")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 JohnnyLuvBuckets, MIT License")]
-[assembly: AssemblyVersion("1.8.0.0")]
-[assembly: AssemblyFileVersion("1.8.0.0")]
+[assembly: AssemblyVersion("1.8.1.0")]
+[assembly: AssemblyFileVersion("1.8.1.0")]
 
 namespace XgpuBPatcher
 {
@@ -133,7 +133,7 @@ namespace XgpuBPatcher
                 // 1.0/1.1 (Conexant) with OEM RAM: based on the verified 1.0/1.1 "gpurev_fixedcal2" build.
                 // Takes the 1.6 path only when the GPU reports revision D3 (XGPU-B), keeps the EEPROM-read
                 // structure with fixed calibration, uses 1.0/1.1 pad values and leaves the encoder setup
-                // alone. 128 MB uses the 1.4 128 MB calibration.
+                // alone. 128 MB uses 0x122C = AAAAAAAA and 0x1214 = AAAAAAAA.
                 p.Add(new Patch(0x158, "081000000009000000", "060800000000000000", "GPU revision check (replaces SMBus board check)"));
                 p.Add(new Patch(0x161, "090000000024000000", "0800000000e5ffffff", "GPU revision check"));
                 p.Add(new Patch(0x16A, "060800000000000000", "1100c00000ff000000", "GPU revision check"));
@@ -142,7 +142,9 @@ namespace XgpuBPatcher
                 p.Add(new Patch(0x185, "0900000000c9060000", "08d3000000c9060000", "Take the 1.6 path only for an XGPU-B (rev D3)"));
                 p.Add(new Patch(0x57E, "060000ffff00000000", AndOr(ram.R10B8), "0x10B8 = " + ram.R10B8.ToString("X8")));
                 p.Add(new Patch(0x5BD, "024812000f00000000", AndOr(ram.R122C), "0x122C = " + ram.R122C.ToString("X8")));
-                p.Add(new Patch(0x5E1, "024812000f00000000", AndOr(ram.R1214), "0x1214 = " + ram.R1214.ToString("X8")));
+                // 1.0/1.1 with 128 MB: 0x1214 = AAAAAAAA was the most stable on cold boots (68686868 fragged 7 of 10).
+                uint r1214 = (ramIndex == 1) ? 0xAAAAAAAAu : ram.R1214;
+                p.Add(new Patch(0x5E1, "024812000f00000000", AndOr(r1214), "0x1214 = " + r1214.ToString("X8")));
                 p.Add(new Patch(0x72E, "033012000fffffffff", "033012000ff8f8f8f8", "Pad 0x1230 = F8F8F8F8"));
                 p.Add(new Patch(0x737, "033412000faaaaaaaa", "033412000f87878787", "Pad 0x1234 = 87878787"));
                 p.Add(new Patch(0x740, "033812000faaaaaaaa", "033812000fbbbbbbbb", "Pad 0x1238 = BBBBBBBB"));
